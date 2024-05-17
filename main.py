@@ -5,34 +5,39 @@ from selenium.webdriver.common.by import By
 
 driver = webdriver.Chrome()
 
-url = "https://togliatti.hh.ru/vacancies/programmist"
+url = "https://www.divan.ru/tolyatti/category/svet"
 
 driver.get(url)
 
 time.sleep(3)
 
-vacancies = driver.find_elements(By.CLASS_NAME, 'vacancy-card--H8LvOiOGPll0jZvYpxIF')
+# Ищем все элементы продуктов на странице
+products = driver.find_elements(By.CLASS_NAME, 'WdR1o')
 
-parced_data = []
+parsed_data = []
 
-for vacancy in vacancies:
+for product in products:
     try:
-        title = vacancy.find_element(By.CSS_SELECTOR, 'span.vacancy-name--SYbxrgpHgHedVTkgI_cA').text
-        company = vacancy.find_element(By.CSS_SELECTOR, 'span.company-info-text--O32pGCRW0YDmp3BHuNOP').text
-        salary = vacancy.find_element(By.CSS_SELECTOR, 'span.compensation-text--cCPBXayRjn5GuLFWhGTJ').text
-        link = vacancy.find_element(By.CSS_SELECTOR, 'a.bloko-link').get_attribute('href')
-    except:
-        print("произошла ошибка при парсинге")
+        # Извлекаем название продукта
+        title = product.find_element(By.CSS_SELECTOR, 'span[itemprop="name"]').text
+
+        # Извлекаем цену продукта
+        price = product.find_element(By.CSS_SELECTOR, 'meta[itemprop="price"]').get_attribute('content')
+
+        # Извлекаем URL продукта
+        url = product.find_element(By.CSS_SELECTOR, 'link[itemprop="url"]').get_attribute('href')
+    except Exception as e:
+        print(f"Произошла ошибка при парсинге: {e}")
         continue
 
-    parced_data.append([title, company, salary, link])
+    parsed_data.append([title, price, url])
 
 driver.quit()
 
 # Запись данных с BOM
-with open("hh.csv", 'w', newline='', encoding='utf-8') as file:
+with open("products.csv", 'w', newline='', encoding='utf-8') as file:
     # Запись BOM в начало файла
     file.write('\ufeff')
     writer = csv.writer(file)
-    writer.writerow(['Название вакансии', 'название компании', 'зарплата', 'ссылка на вакансию'])
-    writer.writerows(parced_data)
+    writer.writerow(['Продукт', 'Цена', 'Ссылка'])
+    writer.writerows(parsed_data)
