@@ -29,8 +29,10 @@ for vacancy in vacancies:
 
 driver.quit()
 
-
+# Запись данных с BOM
 with open("hh.csv", 'w', newline='', encoding='utf-8') as file:
+    # Запись BOM в начало файла
+    file.write('\ufeff')
     writer = csv.writer(file)
     writer.writerow(['Название вакансии', 'название компании', 'зарплата', 'ссылка на вакансию'])
     writer.writerows(parced_data)
